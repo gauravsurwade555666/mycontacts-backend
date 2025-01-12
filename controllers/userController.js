@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 //@desc Register a user
 //@route POST /api/users
@@ -26,13 +27,13 @@ const registerUsers = asyncHandler(async (req, res) => {
 
     });
     console.log(`User created: ${user}`);
-    if(user){
+    if (user) {
         res.status(201).json({
             _id: user._id,
             username: user.username,
             email: user.email
         });
-    }else{
+    } else {
         res.status(400);
         throw new Error('user data is not available');
     }
@@ -44,7 +45,28 @@ const registerUsers = asyncHandler(async (req, res) => {
 //@route POST /api/users/login
 //@access Public
 const loginUser = asyncHandler(async (req, res) => {
-    res.json({ message: "login user" });
+    const { email, password } = req.body;
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('All fields are mandatory');
+    }
+    const user = await User.findOne({ email });
+    //compare password with hashed password
+    if (user && (await bcrypt.compare(password, user.password))) {
+        const accesToken = jwt.sign({
+            user: {
+                username: user.username,
+                email: user.email,
+                id: user.id
+            }
+        }, process.env.JWT_SECRET, { expiresIn: '3m' });
+        res.status(200).json({ accesToken })
+
+    } else {
+        res.status(401);
+        throw new Error('Invalid email or password');
+    }
+
 });
 
 
@@ -52,7 +74,8 @@ const loginUser = asyncHandler(async (req, res) => {
 //@route POST /api/users/current
 //@access Private
 const currentUser = asyncHandler(async (req, res) => {
-    res.json({ message: "current user info" });
+
+    res.json(req.user);
 });
 
 module.exports = { registerUsers, loginUser, currentUser };
