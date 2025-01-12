@@ -59,7 +59,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 email: user.email,
                 id: user.id
             }
-        }, process.env.JWT_SECRET, { expiresIn: '3m' });
+        }, process.env.JWT_SECRET, { expiresIn: '10m' });
         res.status(200).json({ accesToken })
 
     } else {

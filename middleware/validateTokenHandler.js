@@ -13,6 +13,7 @@ const validateTokenHandler = asyncHandler(async (req, res, next) => {
                throw new Error('Not authorized, token failed or expired');
            }
            req.user = decode.user;
+           console.log(req.user);
            next();
        });
    }
