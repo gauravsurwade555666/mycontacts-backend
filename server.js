@@ -1,17 +1,14 @@
 const express = require('express');
 const dotenv = require('dotenv').config();
-const app = express();
 const port = process.env.PORT || 3000;
 const errorHandler=require("./middleware/errorHandler");
+const connectDB = require('./config/dbConnections');
+connectDB();
+const app = express();
 
-// app.get('/api/contacts', (req, res) => {
-//     res.status(200).json(
-//         {
-//             message :'get all contacts'
-//         });
-// });
 app.use(express.json());
 app.use("/api/contacts", require("./routes/contactRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
 app.use(errorHandler);
 
 
